@@ -2,20 +2,29 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Events;
 
 using Locker.Resolvers;
 using Locker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var signingKey = new SymmetricSecurityKey(
-    Encoding.UTF8.GetBytes("MySuperSecretKey"));
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Logging.AddSerilog();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var signingKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes("MySuperSecretKey"));
+
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
@@ -28,7 +37,8 @@ builder.Services
 builder.Services.AddPooledDbContextFactory<DataContext>(options =>
 {
     var connection = builder.Configuration.GetConnectionString("lockerdb");
-    options.UseNpgsql(connection, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+    options.UseNpgsql(connection, o =>
+        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 });
 
 builder.Services.AddGraphQLServer()
