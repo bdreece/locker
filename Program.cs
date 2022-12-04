@@ -62,6 +62,7 @@ builder.Services.AddPooledDbContextFactory<DataContext>(options =>
 
 builder.Services.AddGraphQLServer()
     .RegisterDbContext<DataContext>(DbContextKind.Pooled)
+    .AddAuthorization()
     .AddProjections()
     .AddFiltering()
     .AddSorting()
