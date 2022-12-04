@@ -11,6 +11,7 @@ namespace Locker.Resolvers;
 public partial class Query
 {
     [Authorize(Roles = new[] { "admin", "service" })]
+    [UsePaging]
     [UseProjection]
     [UseFiltering]
     [UseSorting]

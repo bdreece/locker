@@ -1,0 +1,14 @@
+{
+  "name": "@locker/prisma",
+  "version": "0.1.0",
+  "scripts": {
+    "studio": "prisma db pull && prisma studio",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "prisma": "^4.7.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.7.1"
+  }
+}

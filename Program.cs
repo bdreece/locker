@@ -26,7 +26,6 @@ builder.AddLockerOptions()
 var app = builder.Build();
 
 app.UseAuthentication();
-app.UseHttpsRedirection();
 
 app.MapGraphQL();
 app.MapBananaCakePop();

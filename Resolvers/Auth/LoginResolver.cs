@@ -7,13 +7,13 @@ using Locker.Services;
 
 namespace Locker.Resolvers;
 
-public record class LoginPayload(string AccessToken, DateTime Expiration);
+public record class Login(string AccessToken, DateTime Expiration);
 
 public partial class Mutation
 {
     [Error(typeof(MissingOneOfException))]
     [Error(typeof(BadCredentialsException))]
-    public async Task<LoginPayload> LoginAsync(
+    public async Task<Login> LoginAsync(
         LoginInput input,
         DataContext db,
         [Service] IHttpContextAccessor httpContextAccessor,
@@ -21,6 +21,7 @@ public partial class Mutation
         [Service] ITokenService tokenService)
     {
         var ctx = httpContextAccessor.HttpContext;
+
         Expression<Func<User, bool>>? predicate = default;
         if (input.Email is not null)
             predicate = u => u.Email == input.Email;
@@ -29,6 +30,7 @@ public partial class Mutation
         else
             throw new MissingOneOfException("email", "phone");
 
+        _logger.Information("Querying user from database...");
         var user = await db.Users
             .Where(predicate)
             .SingleOrDefaultAsync();
@@ -36,13 +38,15 @@ public partial class Mutation
         if (user is null)
             throw new BadCredentialsException();
 
+        _logger.Information("Verifying user password...");
         var result = hashService.VerifyHashedPassword(user, user.Hash, input.Password);
         if (result != PasswordVerificationResult.Success)
             throw new BadCredentialsException();
 
+
+        _logger.Information("Creating access and refresh tokens...");
         var accessToken = await tokenService.BuildAccessTokenAsync(user, input.Context);
         var refreshToken = tokenService.BuildRefreshToken(user, input.Context);
-
         var accessJwt = tokenService.Encode(accessToken);
         var refreshJwt = tokenService.Encode(refreshToken);
 
@@ -51,6 +55,7 @@ public partial class Mutation
             $"locker_{input.Context}_refresh={refreshJwt}; Path=/; HttpOnly; SameSite=None; Secure"
         );
 
+        _logger.Information("User logged in!");
         return new(accessJwt, accessToken.ValidTo);
     }
 }

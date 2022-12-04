@@ -5,6 +5,8 @@ using Locker.Services;
 
 namespace Locker.Models.Entities;
 
+[Index(nameof(Email), IsUnique = true)]
+[Index(nameof(Phone), IsUnique = true)]
 public sealed class User : EntityBase
 {
     [Required]

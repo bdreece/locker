@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Roles {
+  ID              String      @id(map: "PK_Roles")
+  Name            String      @unique(map: "AK_Roles_Name")
+  DateCreated     DateTime    @db.Timestamptz(6)
+  DateLastUpdated DateTime    @db.Timestamptz(6)
+  UserRoles       UserRoles[]
+}
+
+model UserRoles {
+  ID              String   @id(map: "PK_UserRoles")
+  UserID          String
+  RoleID          String
+  Context         String
+  DateCreated     DateTime @db.Timestamptz(6)
+  DateLastUpdated DateTime @db.Timestamptz(6)
+  Roles           Roles    @relation(fields: [RoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRoles_Roles_RoleID")
+  Users           Users    @relation(fields: [UserID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRoles_Users_UserID")
+
+  @@index([Context], map: "IX_UserRoles_Context")
+  @@index([RoleID], map: "IX_UserRoles_RoleID")
+  @@index([UserID], map: "IX_UserRoles_UserID")
+}
+
+model Users {
+  ID              String      @id(map: "PK_Users")
+  FirstName       String
+  LastName        String
+  Email           String?     @unique(map: "IX_Users_Email")
+  Phone           String?     @unique(map: "IX_Users_Phone")
+  Hash            String
+  DateCreated     DateTime    @db.Timestamptz(6)
+  DateLastUpdated DateTime    @db.Timestamptz(6)
+  UserRoles       UserRoles[]
+}
+
+model EFMigrationsHistory {
+  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.VarChar(150)
+  ProductVersion String @db.VarChar(32)
+
+  @@map("__EFMigrationsHistory")
+}

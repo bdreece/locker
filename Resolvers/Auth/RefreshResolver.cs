@@ -8,14 +8,14 @@ using Locker.Services;
 
 namespace Locker.Resolvers;
 
-public record class RefreshPayload(string AccessToken, DateTime Expiration);
+public record class Refresh(string AccessToken, DateTime Expiration);
 
 public partial class Query
 {
     [Error(typeof(MissingTokenException))]
     [Error(typeof(UnauthenticatedException))]
     [Error(typeof(EntityNotFoundException))]
-    public async Task<RefreshPayload> RefreshAsync(
+    public async Task<Refresh> RefreshAsync(
         RefreshInput input,
         DataContext db,
         [Service] IHttpContextAccessor httpContextAccessor,
@@ -47,6 +47,6 @@ public partial class Query
         var accessToken = await tokenService.BuildAccessTokenAsync(user, context);
         var accessJwt = tokenService.Encode(accessToken);
 
-        return new RefreshPayload(accessJwt, accessToken.ValidTo);
+        return new(accessJwt, accessToken.ValidTo);
     }
 }

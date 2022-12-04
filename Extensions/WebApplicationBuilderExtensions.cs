@@ -71,12 +71,15 @@ public static class WebApplicationBuilderExtensions
             .AddDiagnosticEventListener<ExecutionEventLogger>()
             .AddDiagnosticEventListener<ServerEventLogger>()
             .RegisterDbContext<DataContext>(DbContextKind.Pooled)
+            .AddGlobalObjectIdentification()
             .AddAuthorization()
             .AddProjections()
             .AddFiltering()
             .AddSorting()
             .AddQueryType<Query>()
-            .AddMutationType<Mutation>();
+            .AddMutationType<Mutation>()
+            .AddMutationConventions(applyToAllMutations: true)
+            .AddQueryFieldToMutationPayloads();
 
         return builder;
     }

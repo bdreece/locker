@@ -8,7 +8,7 @@ public abstract class EntityBase
     [ID]
     [GraphQLName("id")]
     [Key]
-    public string ID { get; init; } = string.Empty;
+    public string ID { get; init; } = Guid.NewGuid().ToString();
 
     [Required]
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;

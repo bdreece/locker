@@ -1,6 +1,8 @@
 bin/
 obj/
 .config/
+.prisma/
 .vscode/
+Migrations/
 README.md
 appsettings.Development.json

@@ -11,7 +11,7 @@ using Locker.Models.Entities;
 
 namespace Locker.Services;
 
-public class TokenService : ITokenService
+public class TokenService : ITokenService, IAsyncDisposable
 {
     private readonly ILogger _logger = Log.Logger.ForContext<TokenService>();
     private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
@@ -27,6 +27,8 @@ public class TokenService : ITokenService
         _key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_options.SecretKey));
         _db = factory.CreateDbContext();
     }
+
+    public ValueTask DisposeAsync() => _db.DisposeAsync();
 
     public async Task<SecurityToken> BuildAccessTokenAsync(User user, string context)
     {

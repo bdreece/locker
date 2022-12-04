@@ -2,8 +2,8 @@ using HotChocolate.AspNetCore.Authorization;
 
 namespace Locker.Resolvers;
 
-public record MePayload(
-    [property: GraphQLType(typeof(IdType))]
+public record Me(
+    [property: ID]
     [property: GraphQLName("id")]
     string ID,
     string Context,
@@ -16,7 +16,7 @@ public record MePayload(
 public partial class Query
 {
     [Authorize]
-    public MePayload GetMe([Service] IHttpContextAccessor httpContextAccessor)
+    public Me GetMe([Service] IHttpContextAccessor httpContextAccessor)
     {
         var ctx = httpContextAccessor.HttpContext;
         return new(

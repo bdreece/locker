@@ -12,6 +12,7 @@ namespace Locker.Resolvers;
 public partial class Query
 {
     [Authorize(Roles = new[] { "admin", "service" })]
+    [UsePaging]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -41,7 +42,7 @@ public partial class Mutation
     [Error(typeof(EntityNotFoundException))]
     [Authorize(Roles = new[] { "admin", "service" })]
     public async Task<User> UpdateUserAsync(
-        [GraphQLType(typeof(IdType))] string id,
+        [ID] string id,
         UpdateUserInput input,
         DataContext db
     )
