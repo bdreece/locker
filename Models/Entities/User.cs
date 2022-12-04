@@ -19,9 +19,6 @@ public sealed class User : EntityBase
     [Required]
     public string Hash { get; set; } = string.Empty;
 
-    [Required]
-    public string Salt { get; set; } = string.Empty;
-
     public IList<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
     public static Task<User> Get(string id, DataContext db) =>

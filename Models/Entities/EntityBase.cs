@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using HotChocolate.Types.Relay;
 
 namespace Locker.Models.Entities;
 
@@ -7,6 +6,7 @@ namespace Locker.Models.Entities;
 public abstract class EntityBase
 {
     [ID]
+    [GraphQLName("id")]
     [Key]
     public string ID { get; init; } = string.Empty;
 

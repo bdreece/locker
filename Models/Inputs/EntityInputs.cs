@@ -6,3 +6,7 @@ public record class UpdateUserInput(
     string? Phone,
     string? Email
 );
+
+public record class CreateRoleInput(string Name);
+
+public record class CreateUserRoleInput(string RoleID, string UserID, string Context);

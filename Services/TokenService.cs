@@ -71,11 +71,12 @@ public class TokenService : ITokenService
                 new(ClaimTypes.NameIdentifier, user.ID),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new(ClaimTypes.Email, user.Email ?? String.Empty),
-                new(ClaimTypes.MobilePhone, user.Phone ?? String.Empty)
+                new(ClaimTypes.MobilePhone, user.Phone ?? String.Empty),
+                new(ClaimTypes.GroupSid, context)
             })),
             Expires = DateTime.UtcNow.Add(validFor),
-            Issuer = issuer,
             Audience = context,
+            Issuer = issuer,
             SigningCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature)
         };
 

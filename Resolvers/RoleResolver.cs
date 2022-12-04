@@ -1,7 +1,4 @@
-using HotChocolate;
-using HotChocolate.Types;
 using HotChocolate.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Locker.Models.Entities;
 using Locker.Models.Inputs;
 using Locker.Services;
