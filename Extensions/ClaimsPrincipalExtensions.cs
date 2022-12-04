@@ -19,6 +19,12 @@ public static class ClaimsPrincipalExtensions
     public static string? GetContext(this ClaimsPrincipal principal) =>
         principal.FindFirstValue(ClaimTypes.GroupSid);
 
+    public static string? GetSecurityStamp(this ClaimsPrincipal principal) =>
+        principal.FindFirstValue(ClaimTypes.Hash);
+
+    public static string? GetActor(this ClaimsPrincipal principal) =>
+        principal.FindFirstValue(ClaimTypes.Actor);
+
     public static IEnumerable<string> GetRoles(this ClaimsPrincipal principal) =>
         principal
             .FindAll(c => c.Type == ClaimTypes.Role)

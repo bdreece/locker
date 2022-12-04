@@ -21,8 +21,8 @@ public partial class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<UserRole> GetUserRoles(DataContext db) =>
-        db.UserRoles;
+    public IQueryable<Service> GetServices(DataContext db) =>
+        db.Services;
 
     [Authorize(Roles = new[] {
         WellKnownRoles.Admin,
@@ -33,42 +33,35 @@ public partial class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<UserRole> GetFirstUserRole(DataContext db) =>
-        db.UserRoles;
+    public IQueryable<Service> GetFirstService(DataContext db) =>
+        db.Services;
 
-    [Authorize(Roles = new[] {
-        WellKnownRoles.Admin,
-        WellKnownRoles.Service
-    })]
-    [UseSingleOrDefault]
-    [UseProjection]
-    [UseFiltering]
-    [UseSorting]
-    public IQueryable<UserRole> GetUniqueUserRole(DataContext db) =>
-        db.UserRoles;
-}
-
-public partial class Mutation
-{
     [Authorize(Roles = new[] {
         WellKnownRoles.Admin,
         WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
-    public async Task<UserRole> CreateUserRoleAsync(CreateUserRoleInput input, DataContext db)
-    {
-        _logger.Information("Creating UserRole...");
-        _logger.Verbose("{@Input}", input);
+    [UseSingleOrDefault]
+    [UseProjection]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Service> GetUniqueService(DataContext db) =>
+        db.Services;
+}
 
-        var userRole = await db.UserRoles.AddAsync(new()
+public partial class Mutation
+{
+    [Authorize(Roles = new[] { WellKnownRoles.Root })]
+    public async Task<Service> CreateServiceAsync(
+        CreateServiceInput input,
+        DataContext db
+    )
+    {
+        var service = await db.Services.AddAsync(new()
         {
-            UserID = input.UserID,
-            RoleID = input.RoleID,
-            Context = input.Context,
+            Name = input.Name,
         });
         await db.SaveChangesAsync();
-
-        _logger.Information("UserRole created!");
-        return userRole.Entity;
+        return service.Entity;
     }
 }

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HotChocolate;
 using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
+using Locker.Models;
 using Locker.Models.Entities;
 using Locker.Models.Inputs;
 using Locker.Services;
@@ -22,6 +23,7 @@ public partial class Query
         [Service] ITokenService tokenService
     )
     {
+        _logger.Information("Parsing refresh token...");
         var ctx = httpContextAccessor.HttpContext;
         var refreshToken = ctx?.Request.Cookies
             .FirstOrDefault(c => c.Key == input.Context).Value;
@@ -29,22 +31,35 @@ public partial class Query
         if (refreshToken is null)
             throw new MissingTokenException(TokenType.RefreshToken);
 
-        var (principal, token) = tokenService.Decode(refreshToken);
+        var (_principal, token) = tokenService.Decode(refreshToken);
 
-        var id = principal.GetID();
-        var context = principal.GetContext();
+        var id = _principal.GetID();
+        var context = _principal.GetContext();
+        var securityStamp = _principal.GetSecurityStamp();
 
         if (id is null || context is null)
             throw new UnauthenticatedException();
 
-        var user = await db.Users
-            .Where(u => u.ID == id)
-            .SingleOrDefaultAsync();
+        _logger.Information("Querying principal...");
+        IPrincipal? principal = _principal.GetActor() switch
+        {
+            WellKnownActors.User => await db.Users
+                .SingleOrDefaultAsync(u => u.ID == id)
+                .ConfigureAwait(false),
+            WellKnownActors.Service => await db.Services
+                .SingleOrDefaultAsync(s => s.ID == id)
+                .ConfigureAwait(false),
+            _ => throw new ArgumentException("Invalid actor"),
+        };
 
-        if (user is null)
-            throw new EntityNotFoundException(typeof(User));
+        if (principal is null)
+            throw new EntityNotFoundException(typeof(IPrincipal));
 
-        var accessToken = await tokenService.BuildAccessTokenAsync(user, context);
+        if (principal.SecurityStamp != securityStamp)
+            throw new UnauthenticatedException();
+
+        _logger.Information("Creating access token");
+        var accessToken = await tokenService.BuildAccessTokenAsync(principal, context);
         var accessJwt = tokenService.Encode(accessToken);
 
         return new(accessJwt, accessToken.ValidTo);

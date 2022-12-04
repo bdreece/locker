@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using HotChocolate.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Locker.Models;
 using Locker.Models.Entities;
 using Locker.Models.Inputs;
 using Locker.Services;
@@ -11,7 +13,12 @@ namespace Locker.Resolvers;
 
 public partial class Query
 {
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[]
+    {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UsePaging]
     [UseProjection]
     [UseFiltering]
@@ -19,7 +26,12 @@ public partial class Query
     public IQueryable<User> GetUsers(DataContext db) =>
         db.Users;
 
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[]
+    {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UseFirstOrDefault]
     [UseProjection]
     [UseFiltering]
@@ -27,7 +39,12 @@ public partial class Query
     public IQueryable<User> GetFirstUser(DataContext db) =>
         db.Users;
 
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[]
+    {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UseSingleOrDefault]
     [UseProjection]
     [UseFiltering]
@@ -40,13 +57,30 @@ public partial class Query
 public partial class Mutation
 {
     [Error(typeof(EntityNotFoundException))]
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[]
+    {
+        WellKnownRoles.User,
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     public async Task<User> UpdateUserAsync(
         [ID] string id,
         UpdateUserInput input,
-        DataContext db
+        DataContext db,
+        ClaimsPrincipal principal
     )
     {
+        _logger.Information("Authorizing request...");
+        var isAdmin = principal.IsInRole(WellKnownRoles.Admin);
+        var isService = principal.IsInRole(WellKnownRoles.Service);
+        var isRoot = principal.IsInRole(WellKnownRoles.Root);
+        var isUpdatingSelf = principal.GetID() == id;
+
+        // Users can only update themselves
+        if (!isAdmin && !isService && !isRoot && !isUpdatingSelf)
+            throw new UnauthorizedException();
+
         _logger.Information("Updating user {ID}...", id);
         _logger.Verbose("{@Input}", input);
         var user = await db.Users

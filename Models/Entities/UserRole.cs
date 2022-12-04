@@ -23,6 +23,6 @@ public sealed class UserRole : EntityBase
     [Required]
     public string Context { get; init; } = string.Empty;
 
-    public static Task<UserRole> Get(string id, DataContext db) =>
+    public static Task<UserRole> Get([ID] string id, DataContext db) =>
         db.UserRoles.SingleAsync(userRole => userRole.ID == id);
 }

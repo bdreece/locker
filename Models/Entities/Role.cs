@@ -11,6 +11,6 @@ public sealed class Role : EntityBase
 
     public IList<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
-    public static Task<Role> Get(string id, DataContext db) =>
+    public static Task<Role> Get([ID] string id, DataContext db) =>
         db.Roles.SingleAsync(role => role.ID == id);
 }

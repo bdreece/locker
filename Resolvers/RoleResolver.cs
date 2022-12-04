@@ -1,4 +1,6 @@
 using HotChocolate.AspNetCore.Authorization;
+
+using Locker.Models;
 using Locker.Models.Entities;
 using Locker.Models.Inputs;
 using Locker.Services;
@@ -10,7 +12,11 @@ namespace Locker.Resolvers;
 
 public partial class Query
 {
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[] {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UsePaging]
     [UseProjection]
     [UseFiltering]
@@ -19,7 +25,11 @@ public partial class Query
         db.Roles;
 
 
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[] {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UseFirstOrDefault]
     [UseProjection]
     [UseFiltering]
@@ -27,7 +37,11 @@ public partial class Query
     public IQueryable<Role> GetFirstRole(DataContext db) =>
         db.Roles;
 
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[] {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     [UseSingleOrDefault]
     [UseProjection]
     [UseFiltering]
@@ -38,7 +52,11 @@ public partial class Query
 
 public partial class Mutation
 {
-    [Authorize(Roles = new[] { "admin", "service" })]
+    [Authorize(Roles = new[] {
+        WellKnownRoles.Admin,
+        WellKnownRoles.Service,
+        WellKnownRoles.Root,
+    })]
     public async Task<Role> CreateRoleAsync(
         CreateRoleInput input,
         DataContext db

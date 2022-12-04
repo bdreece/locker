@@ -39,6 +39,7 @@ model Users {
   Hash            String
   DateCreated     DateTime    @db.Timestamptz(6)
   DateLastUpdated DateTime    @db.Timestamptz(6)
+  SecurityStamp   String      @default("")
   UserRoles       UserRoles[]
 }
 
@@ -47,4 +48,14 @@ model EFMigrationsHistory {
   ProductVersion String @db.VarChar(32)
 
   @@map("__EFMigrationsHistory")
+}
+
+model Services {
+  ID              String   @id(map: "PK_Services")
+  Name            String   @unique(map: "AK_Services_Name")
+  Context         String
+  ApiKey          String
+  DateCreated     DateTime @db.Timestamptz(6)
+  DateLastUpdated DateTime @db.Timestamptz(6)
+  SecurityStamp   String
 }

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Locker.Models.Entities;
@@ -23,6 +24,7 @@ public partial class Mutation
         [Service] IPasswordHasher<User> hashService
     )
     {
+
         Expression<Func<User, bool>>? predicate = default;
         if (input.Email is not null)
             predicate = u => u.Email == input.Email;
@@ -50,6 +52,7 @@ public partial class Mutation
             })
             .ToList();
 
+
         var user = new User
         {
             FirstName = input.FirstName,
@@ -59,12 +62,10 @@ public partial class Mutation
             UserRoles = userRoles,
         };
         _logger.Verbose("{@User}", user);
-
-        user.Hash = hashService.HashPassword(user, input.Password);
+        user.UpdateHash(hashService.HashPassword(user, input.Password));
 
         _logger.Information("Persisting user to database...");
         var entry = await db.AddAsync(user);
-
 
         await db.SaveChangesAsync();
 

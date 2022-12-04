@@ -4,6 +4,11 @@ public record class LoginInput(string? Email, string? Phone, string Password, st
 
 public record class RefreshInput(string Context);
 
+public record class AuthenticateServiceInput(
+    string Name,
+    string ApiKey
+);
+
 public record class RegisterInput(
     string FirstName,
     string LastName,

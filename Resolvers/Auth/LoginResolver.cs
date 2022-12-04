@@ -50,10 +50,7 @@ public partial class Mutation
         var accessJwt = tokenService.Encode(accessToken);
         var refreshJwt = tokenService.Encode(refreshToken);
 
-        ctx?.Response.Headers.Add(
-            "Set-Cookie",
-            $"locker_{input.Context}_refresh={refreshJwt}; Path=/; HttpOnly; SameSite=None; Secure"
-        );
+        ctx?.Response.Headers.AddRefreshTokenCookie(refreshJwt, input.Context);
 
         _logger.Information("User logged in!");
         return new(accessJwt, accessToken.ValidTo);
