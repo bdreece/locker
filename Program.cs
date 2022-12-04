@@ -1,10 +1,13 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 
+using Locker;
+using Locker.Models.Entities;
 using Locker.Resolvers;
 using Locker.Services;
 
@@ -18,21 +21,37 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Logging.AddSerilog();
 
+builder.Services.AddOptions<LockerOptions>()
+    .Configure<IConfiguration>((options, config) =>
+    {
+        config.GetSection("Locker").Bind(options);
+    });
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var section = builder.Configuration.GetSection("Locker");
+        var issuer = section.GetValue<string>("Issuer");
+        var secret = section.GetValue<string>("Secret");
         var signingKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("MySuperSecretKey"));
+            Encoding.UTF8.GetBytes(secret ?? "secret"));
 
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
-                ValidIssuer = "https://locker.bdreece.dev",
+                ValidateIssuer = true,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                ValidIssuer = issuer,
                 IssuerSigningKey = signingKey
             };
     });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 builder.Services.AddPooledDbContextFactory<DataContext>(options =>
 {

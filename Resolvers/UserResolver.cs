@@ -46,17 +46,23 @@ public partial class Mutation
         DataContext db
     )
     {
+        _logger.Information("Updating user {ID}...", id);
+        _logger.Verbose("{@Input}", input);
         var user = await db.Users
             .Where(u => u.ID == id)
             .SingleOrDefaultAsync();
 
         if (user is null)
+        {
+            _logger.Warning("User not found!");
             throw new EntityNotFoundException(typeof(User));
+        }
 
         user.Update(input);
         db.Users.Update(user);
         await db.SaveChangesAsync();
 
+        _logger.Information("User updated!");
         return user;
     }
 }

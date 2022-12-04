@@ -42,16 +42,20 @@ public partial class Mutation
 {
     [Authorize(Roles = new[] { "admin", "service" })]
     public async Task<Role> CreateRoleAsync(
-        [GraphQLType(typeof(IdType))] string id,
         CreateRoleInput input,
         DataContext db
     )
     {
+        _logger.Information("Creating role...");
+        _logger.Verbose("{@Input}", input);
+
         var role = await db.Roles.AddAsync(new()
         {
             Name = input.Name
         });
         await db.SaveChangesAsync();
+
+        _logger.Information("Role created!");
         return role.Entity;
     }
 }
