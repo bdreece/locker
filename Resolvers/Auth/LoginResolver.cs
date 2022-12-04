@@ -18,7 +18,8 @@ public partial class Mutation
         DataContext db,
         [Service] IHttpContextAccessor httpContextAccessor,
         [Service] IPasswordHasher<User> hashService,
-        [Service] ITokenService tokenService)
+        [Service] ITokenService tokenService
+    )
     {
         var ctx = httpContextAccessor.HttpContext;
 
@@ -42,7 +43,6 @@ public partial class Mutation
         var result = hashService.VerifyHashedPassword(user, user.Hash, input.Password);
         if (result != PasswordVerificationResult.Success)
             throw new BadCredentialsException();
-
 
         _logger.Information("Creating access and refresh tokens...");
         var accessToken = await tokenService.BuildAccessTokenAsync(user, input.Context);
