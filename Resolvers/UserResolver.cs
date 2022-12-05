@@ -100,4 +100,20 @@ public partial class Mutation
         _logger.Information("User updated!");
         return user;
     }
+
+    [Authorize(Roles = new[] { WellKnownRoles.Root })]
+    public async Task<User> DeleteUserAsync([ID] string id, DataContext db)
+    {
+        _logger.Information("Querying user...");
+        var user = await db.Users.SingleOrDefaultAsync(u => u.ID == id);
+        if (user is null)
+            throw new EntityNotFoundException(typeof(User));
+
+        _logger.Information("Deleting user...");
+        db.Users.Remove(user);
+        await db.SaveChangesAsync();
+
+        _logger.Information("User deleted!");
+        return user;
+    }
 }

@@ -8,8 +8,6 @@ public record Me(
     string ID,
     string Context,
     string Name,
-    string? Email,
-    string? Phone,
     IEnumerable<string> Roles
 );
 
@@ -23,8 +21,6 @@ public partial class Query
             ctx?.User.GetID() ?? string.Empty,
             ctx?.User.GetContext() ?? string.Empty,
             ctx?.User.GetName() ?? string.Empty,
-            ctx?.User.GetEmail(),
-            ctx?.User.GetPhone(),
             ctx?.User.GetRoles() ?? Enumerable.Empty<string>()
         );
     }

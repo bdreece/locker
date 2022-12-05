@@ -8,17 +8,11 @@ using Locker.Services;
 
 namespace Locker.Resolvers;
 
-public record class Register(
-    [property: ID]
-    [property: GraphQLName("id")]
-    string ID
-);
-
 public partial class Mutation
 {
     [Error(typeof(MissingOneOfException))]
     [Error(typeof(EntityConflictException))]
-    public async Task<Register> RegisterAsync(
+    public async Task<User> RegisterAsync(
         RegisterInput input,
         DataContext db,
         [Service] IPasswordHasher<User> hashService
@@ -70,6 +64,6 @@ public partial class Mutation
         await db.SaveChangesAsync();
 
         _logger.Information("User registered!");
-        return new(entry.Entity.ID);
+        return entry.Entity;
     }
 }

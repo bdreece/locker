@@ -1,4 +1,5 @@
 using HotChocolate.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 using Locker.Models;
 using Locker.Models.Entities;
@@ -63,5 +64,21 @@ public partial class Mutation
         });
         await db.SaveChangesAsync();
         return service.Entity;
+    }
+
+    [Authorize(Roles = new[] { WellKnownRoles.Root })]
+    public async Task<Service> DeleteServiceAsync([ID] string id, DataContext db)
+    {
+        _logger.Information("Querying service...");
+        var service = await db.Services.SingleOrDefaultAsync(s => s.ID == id);
+        if (service is null)
+            throw new EntityNotFoundException(typeof(Service));
+
+        _logger.Information("Deleting service...");
+        db.Services.Remove(service);
+        await db.SaveChangesAsync();
+
+        _logger.Information("Service deleted!");
+        return service;
     }
 }

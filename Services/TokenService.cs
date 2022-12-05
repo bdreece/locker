@@ -31,7 +31,6 @@ public class TokenService : ITokenService
 
     public async Task<SecurityToken> BuildAccessTokenAsync(IPrincipal principal, string context, TimeSpan? validFor = default)
     {
-
         var claims = Enumerable.Empty<Claim>();
         if (principal is User user)
             claims = await GetUserClaimsAsync(user, context);
@@ -81,15 +80,15 @@ public class TokenService : ITokenService
 
     private async Task<IEnumerable<Claim>> GetUserClaimsAsync(User user, string context)
     {
-        var userRoles = await _db.UserRoles
+        var roles = await _db.UserRoles
             .Include(userRole => userRole.Role)
             .Where(userRole => userRole.UserID == user.ID)
             .Where(userRole => userRole.Context == context || userRole.Context == "root")
             .Select(userRole => userRole.Role!.Name)
             .ToArrayAsync();
 
-        return userRoles
-            .Select(userRole => new Claim(ClaimTypes.Role, userRole))
+        return roles
+            .Select(role => new Claim(ClaimTypes.Role, role))
             .Concat(new Claim[]
             {
                 new(ClaimTypes.Actor, WellKnownActors.User),
