@@ -15,10 +15,10 @@ public partial class Mutation
     public async Task<User> RegisterAsync(
         RegisterInput input,
         DataContext db,
-        [Service] IPasswordHasher<User> hashService
+        [Service] IPasswordHasher<User> hashService,
+        [GlobalState(tenantKey)] string? tenantID
     )
     {
-
         Expression<Func<User, bool>>? predicate = default;
         if (input.Email is not null)
             predicate = u => u.Email == input.Email;
@@ -38,14 +38,17 @@ public partial class Mutation
             await db.Roles.SingleAsync(r => r.Name == "user"),
         };
 
-        var userRoles = roles
-            .Select(role => new UserRole
+        var tenant = await db.Tenants.SingleOrDefaultAsync(t => t.ID == tenantID);
+        if (tenant is null)
+            throw new EntityNotFoundException(typeof(Tenant));
+
+        var accounts = roles
+            .Select(role => new Account
             {
                 Role = role,
-                Context = input.Context
+                Tenant = tenant,
             })
             .ToList();
-
 
         var user = new User
         {
@@ -53,7 +56,7 @@ public partial class Mutation
             LastName = input.LastName,
             Email = input.Email,
             Phone = input.Phone,
-            UserRoles = userRoles,
+            Accounts = accounts,
         };
         _logger.Verbose("{@User}", user);
         user.UpdateHash(hashService.HashPassword(user, input.Password));

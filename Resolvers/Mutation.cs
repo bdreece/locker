@@ -6,4 +6,5 @@ namespace Locker.Resolvers;
 public partial class Mutation
 {
     private static readonly ILogger _logger = Log.Logger.ForContext<Mutation>();
+    private const string tenantKey = "tenant";
 }

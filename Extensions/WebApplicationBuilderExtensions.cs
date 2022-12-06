@@ -107,11 +107,13 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddLockerGraphQL(this WebApplicationBuilder builder)
     {
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddGraphQLServer()
+        builder.Services
+            .AddHttpContextAccessor()
+            .AddGraphQLServer()
+            .RegisterDbContext<DataContext>(DbContextKind.Pooled)
             .AddDiagnosticEventListener<ExecutionEventLogger>()
             .AddDiagnosticEventListener<ServerEventLogger>()
-            .RegisterDbContext<DataContext>(DbContextKind.Pooled)
+            .AddHttpRequestInterceptor<HttpRequestInterceptor>()
             .AddGlobalObjectIdentification()
             .AddAuthorization()
             .AddProjections()

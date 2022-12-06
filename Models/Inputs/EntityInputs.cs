@@ -11,4 +11,4 @@ public record class CreateServiceInput(string Name);
 
 public record class CreateRoleInput(string Name);
 
-public record class CreateUserRoleInput(string RoleID, string UserID, string Context);
+public record struct CreateAccountInput(string RoleID, string UserID, string? TenantID);

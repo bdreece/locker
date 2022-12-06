@@ -8,39 +8,26 @@ datasource db {
 }
 
 model Roles {
-  ID              String      @id(map: "PK_Roles")
-  Name            String      @unique(map: "AK_Roles_Name")
-  DateCreated     DateTime    @db.Timestamptz(6)
-  DateLastUpdated DateTime    @db.Timestamptz(6)
-  UserRoles       UserRoles[]
-}
-
-model UserRoles {
-  ID              String   @id(map: "PK_UserRoles")
-  UserID          String
-  RoleID          String
-  Context         String
-  DateCreated     DateTime @db.Timestamptz(6)
-  DateLastUpdated DateTime @db.Timestamptz(6)
-  Roles           Roles    @relation(fields: [RoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRoles_Roles_RoleID")
-  Users           Users    @relation(fields: [UserID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRoles_Users_UserID")
-
-  @@index([Context], map: "IX_UserRoles_Context")
-  @@index([RoleID], map: "IX_UserRoles_RoleID")
-  @@index([UserID], map: "IX_UserRoles_UserID")
+  ID                                 String     @id(map: "PK_Roles")
+  Name                               String     @unique(map: "AK_Roles_Name")
+  DateCreated                        DateTime   @db.Timestamptz(6)
+  DateLastUpdated                    DateTime   @db.Timestamptz(6)
+  Accounts                           Accounts[]
+  Tenants_Tenants_AdminRoleIDToRoles Tenants[]  @relation("Tenants_AdminRoleIDToRoles")
+  Tenants_Tenants_UserRoleIDToRoles  Tenants[]  @relation("Tenants_UserRoleIDToRoles")
 }
 
 model Users {
-  ID              String      @id(map: "PK_Users")
+  ID              String     @id(map: "PK_Users")
   FirstName       String
   LastName        String
-  Email           String?     @unique(map: "IX_Users_Email")
-  Phone           String?     @unique(map: "IX_Users_Phone")
+  Email           String?    @unique(map: "IX_Users_Email")
+  Phone           String?    @unique(map: "IX_Users_Phone")
   Hash            String
-  DateCreated     DateTime    @db.Timestamptz(6)
-  DateLastUpdated DateTime    @db.Timestamptz(6)
-  SecurityStamp   String      @default("")
-  UserRoles       UserRoles[]
+  DateCreated     DateTime   @db.Timestamptz(6)
+  DateLastUpdated DateTime   @db.Timestamptz(6)
+  SecurityStamp   String     @default("")
+  Accounts        Accounts[]
 }
 
 model EFMigrationsHistory {
@@ -53,9 +40,44 @@ model EFMigrationsHistory {
 model Services {
   ID              String   @id(map: "PK_Services")
   Name            String   @unique(map: "AK_Services_Name")
-  Context         String
+  TenantID        String
   ApiKey          String
   DateCreated     DateTime @db.Timestamptz(6)
   DateLastUpdated DateTime @db.Timestamptz(6)
   SecurityStamp   String
+  Tenants         Tenants  @relation(fields: [TenantID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Services_Tenants_TenantID")
+
+  @@index([TenantID], map: "IX_Services_TenantID")
+}
+
+model Accounts {
+  ID              String   @id(map: "PK_Accounts")
+  UserID          String
+  RoleID          String
+  TenantID        String
+  DateCreated     DateTime @db.Timestamptz(6)
+  DateLastUpdated DateTime @db.Timestamptz(6)
+  Roles           Roles    @relation(fields: [RoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Accounts_Roles_RoleID")
+  Tenants         Tenants  @relation(fields: [TenantID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Accounts_Tenants_TenantID")
+  Users           Users    @relation(fields: [UserID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Accounts_Users_UserID")
+
+  @@index([RoleID], map: "IX_Accounts_RoleID")
+  @@index([TenantID], map: "IX_Accounts_TenantID")
+  @@index([UserID], map: "IX_Accounts_UserID")
+}
+
+model Tenants {
+  ID                               String     @id(map: "PK_Tenants")
+  Name                             String     @unique(map: "IX_Tenants_Name")
+  UserRoleID                       String
+  AdminRoleID                      String
+  DateCreated                      DateTime   @db.Timestamptz(6)
+  DateLastUpdated                  DateTime   @db.Timestamptz(6)
+  Accounts                         Accounts[]
+  Services                         Services[]
+  Roles_Tenants_AdminRoleIDToRoles Roles      @relation("Tenants_AdminRoleIDToRoles", fields: [AdminRoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tenants_Roles_AdminRoleID")
+  Roles_Tenants_UserRoleIDToRoles  Roles      @relation("Tenants_UserRoleIDToRoles", fields: [UserRoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tenants_Roles_UserRoleID")
+
+  @@index([AdminRoleID], map: "IX_Tenants_AdminRoleID")
+  @@index([UserRoleID], map: "IX_Tenants_UserRoleID")
 }

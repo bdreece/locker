@@ -5,8 +5,7 @@ using Locker.Services;
 
 namespace Locker.Models.Entities;
 
-[Index(nameof(Context))]
-public sealed class UserRole : EntityBase
+public sealed class Account : EntityBase
 {
     [Required]
     [ID(nameof(User))]
@@ -21,8 +20,11 @@ public sealed class UserRole : EntityBase
     public Role? Role { get; init; }
 
     [Required]
-    public string Context { get; init; } = string.Empty;
+    [ID(nameof(Tenant))]
+    [ForeignKey(nameof(Tenant))]
+    public string TenantID { get; init; } = string.Empty;
+    public Tenant? Tenant { get; init; }
 
-    public static Task<UserRole> Get([ID] string id, DataContext db) =>
-        db.UserRoles.SingleAsync(userRole => userRole.ID == id);
+    public static Task<Account> Get([ID] string id, DataContext db) =>
+        db.Accounts.SingleAsync(account => account.ID == id);
 }

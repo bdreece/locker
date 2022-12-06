@@ -29,19 +29,14 @@ public class TokenService : ITokenService
 
     public ValueTask DisposeAsync() => _db.DisposeAsync();
 
-    public async Task<SecurityToken> BuildAccessTokenAsync(IPrincipal principal, string context, TimeSpan? validFor = default)
+    public async Task<SecurityToken> BuildAccessTokenAsync(User principal, string tenant, TimeSpan? validFor = default)
     {
-        var claims = Enumerable.Empty<Claim>();
-        if (principal is User user)
-            claims = await GetUserClaimsAsync(user, context);
-        else if (principal is Service service)
-            claims = GetServiceClaims(service);
-
-        return BuildToken(principal, context, claims, validFor ?? TimeSpan.FromHours(2));
+        var claims = await GetUserClaimsAsync(principal, tenant);
+        return BuildToken(principal, tenant, claims, validFor ?? TimeSpan.FromHours(2));
     }
 
-    public SecurityToken BuildRefreshToken(IPrincipal principal, string context) =>
-        BuildToken(principal, context, Enumerable.Empty<Claim>(), TimeSpan.FromDays(365));
+    public SecurityToken BuildRefreshToken(User principal, string tenant) =>
+        BuildToken(principal, tenant, Enumerable.Empty<Claim>(), TimeSpan.FromDays(365));
 
     public string Encode(SecurityToken token) =>
         _tokenHandler.WriteToken(token);
@@ -59,18 +54,13 @@ public class TokenService : ITokenService
         return (principal, securityToken);
     }
 
-    private SecurityToken BuildToken(IPrincipal principal, string context, IEnumerable<Claim> claims, TimeSpan validFor)
+    private SecurityToken BuildToken(User principal, string tenantID, IEnumerable<Claim> claims, TimeSpan validFor)
     {
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims.Concat(new Claim[]
-            {
-                new(ClaimTypes.NameIdentifier, principal.ID),
-                new(ClaimTypes.Name, principal.Name),
-                new(ClaimTypes.Hash, principal.SecurityStamp),
-            })),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.Add(validFor),
-            Audience = context,
+            Audience = tenantID,
             Issuer = _options.Issuer,
             SigningCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature)
         };
@@ -78,30 +68,26 @@ public class TokenService : ITokenService
         return _tokenHandler.CreateToken(tokenDescriptor);
     }
 
-    private async Task<IEnumerable<Claim>> GetUserClaimsAsync(User user, string context)
+    private async Task<IEnumerable<Claim>> GetUserClaimsAsync(User user, string tenantID)
     {
-        var roles = await _db.UserRoles
-            .Include(userRole => userRole.Role)
-            .Where(userRole => userRole.UserID == user.ID)
-            .Where(userRole => userRole.Context == context || userRole.Context == "root")
-            .Select(userRole => userRole.Role!.Name)
+        var roles = await _db.Accounts
+            .Include(acct => acct.Role)
+            .Include(acct => acct.Tenant)
+            .Where(acct => acct.UserID == user.ID)
+            .Where(acct => acct.Tenant!.ID == tenantID || acct.Tenant.Name == "root")
+            .Select(acct => acct.Role!.Name)
             .ToArrayAsync();
 
         return roles
             .Select(role => new Claim(ClaimTypes.Role, role))
             .Concat(new Claim[]
             {
-                new(ClaimTypes.Actor, WellKnownActors.User),
+                new(ClaimTypes.NameIdentifier, user.ID),
+                new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                new(ClaimTypes.Hash, user.SecurityStamp),
                 new(ClaimTypes.Email, user.Email ?? string.Empty),
                 new(ClaimTypes.MobilePhone, user.Phone ?? string.Empty),
-                new(ClaimTypes.GroupSid, context)
+                new(ClaimTypes.GroupSid, tenantID)
             });
     }
-
-    private Claim[] GetServiceClaims(Service service) => new Claim[]
-    {
-        new(ClaimTypes.Actor, WellKnownActors.Service),
-        new(ClaimTypes.Role, WellKnownRoles.Service),
-        new(ClaimTypes.GroupSid, service.Context)
-    };
 }

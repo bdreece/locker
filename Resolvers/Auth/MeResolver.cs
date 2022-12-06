@@ -14,12 +14,17 @@ public record Me(
 public partial class Query
 {
     [Authorize]
-    public Me GetMe([Service] IHttpContextAccessor httpContextAccessor)
+    public Me GetMe(
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [GlobalState(tenantKey)] string? tenantID
+    )
     {
         var ctx = httpContextAccessor.HttpContext;
+        if (tenantID is null || tenantID != ctx?.User.GetTenantID())
+            throw new UnauthorizedException();
         return new(
             ctx?.User.GetID() ?? string.Empty,
-            ctx?.User.GetContext() ?? string.Empty,
+            ctx?.User.GetTenantID() ?? string.Empty,
             ctx?.User.GetName() ?? string.Empty,
             ctx?.User.GetRoles() ?? Enumerable.Empty<string>()
         );

@@ -17,16 +17,16 @@ public partial class Query
     [Error(typeof(UnauthenticatedException))]
     [Error(typeof(EntityNotFoundException))]
     public async Task<Refresh> RefreshAsync(
-        RefreshInput input,
         DataContext db,
         [Service] IHttpContextAccessor httpContextAccessor,
-        [Service] ITokenService tokenService
+        [Service] ITokenService tokenService,
+        [GlobalState(tenantKey)] string tenantID
     )
     {
         _logger.Information("Parsing refresh token...");
         var ctx = httpContextAccessor.HttpContext;
         var refreshToken = ctx?.Request.Cookies
-            .FirstOrDefault(c => c.Key == input.Context).Value;
+            .FirstOrDefault(c => c.Key == $"locker_refresh_{tenantID}").Value;
 
         if (refreshToken is null)
             throw new MissingTokenException(TokenType.RefreshToken);
@@ -34,32 +34,25 @@ public partial class Query
         var (_principal, token) = tokenService.Decode(refreshToken);
 
         var id = _principal.GetID();
-        var context = _principal.GetContext();
+        var tokenTenantID = _principal.GetTenantID();
         var securityStamp = _principal.GetSecurityStamp();
 
-        if (id is null || context is null)
+        if (id is null || tokenTenantID is null || tokenTenantID != tenantID)
             throw new UnauthenticatedException();
 
-        _logger.Information("Querying principal...");
-        IPrincipal? principal = _principal.GetActor() switch
-        {
-            WellKnownActors.User => await db.Users
-                .SingleOrDefaultAsync(u => u.ID == id)
-                .ConfigureAwait(false),
-            WellKnownActors.Service => await db.Services
-                .SingleOrDefaultAsync(s => s.ID == id)
-                .ConfigureAwait(false),
-            _ => throw new ArgumentException("Invalid actor"),
-        };
+        _logger.Information("Querying user...");
+        var user = await db.Users
+            .SingleOrDefaultAsync(u => u.ID == id)
+            .ConfigureAwait(false);
 
-        if (principal is null)
-            throw new EntityNotFoundException(typeof(IPrincipal));
+        if (user is null)
+            throw new EntityNotFoundException(typeof(User));
 
-        if (principal.SecurityStamp != securityStamp)
+        if (user.SecurityStamp != securityStamp)
             throw new UnauthenticatedException();
 
         _logger.Information("Creating access token");
-        var accessToken = await tokenService.BuildAccessTokenAsync(principal, context);
+        var accessToken = await tokenService.BuildAccessTokenAsync(user, tokenTenantID);
         var accessJwt = tokenService.Encode(accessToken);
 
         return new(accessJwt, accessToken.ValidTo);

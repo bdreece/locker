@@ -16,41 +16,62 @@ public partial class Query
     [Authorize(Roles = new[]
     {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UsePaging]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetUsers(DataContext db) =>
-        db.Users;
+    public IQueryable<User> GetUsers(
+        DataContext db,
+        [GlobalState(WellKnownRoles.Admin)] bool isAdmin,
+        [GlobalState(tenantKey)] string? tenantID
+    ) =>
+        isAdmin ?
+            db.Users
+                .Include(u => u.Accounts)
+                .Where(u => u.Accounts.Any(a => a.TenantID == tenantID))
+            : db.Users;
 
     [Authorize(Roles = new[]
     {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UseFirstOrDefault]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetFirstUser(DataContext db) =>
-        db.Users;
+    public IQueryable<User> GetFirstUser(
+        DataContext db,
+        [GlobalState(WellKnownRoles.Admin)] bool isAdmin,
+        [GlobalState(tenantKey)] string? tenantID
+    ) =>
+        isAdmin ?
+            db.Users
+                .Include(u => u.Accounts)
+                .Where(u => u.Accounts.Any(a => a.TenantID == tenantID))
+            : db.Users;
 
     [Authorize(Roles = new[]
     {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UseSingleOrDefault]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetUniqueUser(DataContext db) =>
-        db.Users;
+    public IQueryable<User> GetUniqueUser(
+        DataContext db,
+        [GlobalState(WellKnownRoles.Admin)] bool isAdmin,
+        [GlobalState(tenantKey)] string? tenantID
+    ) =>
+        isAdmin ?
+            db.Users
+                .Include(u => u.Accounts)
+                .Where(u => u.Accounts.Any(a => a.TenantID == tenantID))
+            : db.Users;
 }
 
 
@@ -61,24 +82,23 @@ public partial class Mutation
     {
         WellKnownRoles.User,
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     public async Task<User> UpdateUserAsync(
         [ID] string id,
         UpdateUserInput input,
         DataContext db,
-        ClaimsPrincipal principal
+        ClaimsPrincipal principal,
+        [GlobalState(WellKnownRoles.User)] bool isUser,
+        [GlobalState(WellKnownRoles.Admin)] bool isAdmin,
+        [GlobalState(WellKnownRoles.Root)] bool isRoot
     )
     {
         _logger.Information("Authorizing request...");
-        var isAdmin = principal.IsInRole(WellKnownRoles.Admin);
-        var isService = principal.IsInRole(WellKnownRoles.Service);
-        var isRoot = principal.IsInRole(WellKnownRoles.Root);
         var isUpdatingSelf = principal.GetID() == id;
 
         // Users can only update themselves
-        if (!isAdmin && !isService && !isRoot && !isUpdatingSelf)
+        if (!isAdmin && !isRoot && !isUpdatingSelf)
             throw new UnauthorizedException();
 
         _logger.Information("Updating user {ID}...", id);

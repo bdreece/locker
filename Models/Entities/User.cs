@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Locker.Models.Inputs;
 using Locker.Services;
@@ -8,28 +8,13 @@ namespace Locker.Models.Entities;
 
 [Index(nameof(Email), IsUnique = true)]
 [Index(nameof(Phone), IsUnique = true)]
-public sealed class User : AuthEntityBase
+public sealed class User : EntityBase
 {
     [Required]
     public string FirstName { get; set; } = string.Empty;
 
     [Required]
     public string LastName { get; set; } = string.Empty;
-
-    [NotMapped]
-    public override string Name
-    {
-        get => $"{FirstName} {LastName}";
-        set
-        {
-            var tokens = value.Split(' ');
-            if (tokens.Length != 2)
-                throw new ArgumentException("Invalid name, please enter space-delimited");
-
-            FirstName = tokens[0];
-            LastName = tokens[1];
-        }
-    }
 
     public string? Email { get; set; }
     public string? Phone { get; set; }
@@ -38,10 +23,10 @@ public sealed class User : AuthEntityBase
     [GraphQLIgnore]
     public string Hash { get; set; } = string.Empty;
 
-    public IList<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    [Required]
+    public string SecurityStamp { get; set; } = GenerateSecurityStamp();
 
-    public static Task<User> Get([ID] string id, DataContext db) =>
-        db.Users.SingleAsync(u => u.ID == id);
+    public IList<Account> Accounts { get; set; } = new List<Account>();
 
     public void UpdateHash(string hash)
     {
@@ -62,4 +47,19 @@ public sealed class User : AuthEntityBase
             UpdateSecurityStamp();
     }
 
+    private void UpdateSecurityStamp()
+    {
+        SecurityStamp = GenerateSecurityStamp();
+    }
+
+    public static Task<User> Get([ID] string id, DataContext db) =>
+        db.Users.SingleAsync(u => u.ID == id);
+
+    private static string GenerateSecurityStamp()
+    {
+        using var rng = RandomNumberGenerator.Create();
+        var stamp = new byte[128];
+        rng.GetBytes(stamp);
+        return Convert.ToBase64String(stamp);
+    }
 }

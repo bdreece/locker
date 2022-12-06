@@ -8,6 +8,6 @@ public static class IHeaderDictionaryExtensions
         string context
     ) => dictionary.Add(
         "Set-Cookie",
-        $"locker_{context}_refresh={refreshToken}; Path=/; HttpOnly; SameSite=None; Secure"
+        $"locker_{context}_refresh={refreshToken}; Path=/; HttpOnly; SameSite=Lax"
     );
 }

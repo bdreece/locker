@@ -15,7 +15,6 @@ public partial class Query
 {
     [Authorize(Roles = new[] {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UsePaging]
@@ -28,7 +27,6 @@ public partial class Query
 
     [Authorize(Roles = new[] {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UseFirstOrDefault]
@@ -40,7 +38,6 @@ public partial class Query
 
     [Authorize(Roles = new[] {
         WellKnownRoles.Admin,
-        WellKnownRoles.Service,
         WellKnownRoles.Root,
     })]
     [UseSingleOrDefault]
@@ -53,11 +50,7 @@ public partial class Query
 
 public partial class Mutation
 {
-    [Authorize(Roles = new[] {
-        WellKnownRoles.Admin,
-        WellKnownRoles.Service,
-        WellKnownRoles.Root,
-    })]
+    [Authorize(Roles = new[] { WellKnownRoles.Root })]
     public async Task<Role> CreateRoleAsync(
         CreateRoleInput input,
         DataContext db
@@ -76,9 +69,7 @@ public partial class Mutation
         return role.Entity;
     }
 
-    [Authorize(Roles = new[] {
-        WellKnownRoles.Root,
-    })]
+    [Authorize(Roles = new[] { WellKnownRoles.Root })]
     public async Task<Role> DeleteRoleAsync([ID] string id, DataContext db)
     {
         _logger.Information("Querying role");

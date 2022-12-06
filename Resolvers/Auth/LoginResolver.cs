@@ -18,9 +18,12 @@ public partial class Mutation
         DataContext db,
         [Service] IHttpContextAccessor httpContextAccessor,
         [Service] IPasswordHasher<User> hashService,
-        [Service] ITokenService tokenService
+        [Service] ITokenService tokenService,
+        [GlobalState(tenantKey)] string? tenantID
     )
     {
+        if (tenantID is null)
+            throw new UnauthorizedException();
         var ctx = httpContextAccessor.HttpContext;
 
         Expression<Func<User, bool>>? predicate = default;
@@ -45,12 +48,12 @@ public partial class Mutation
             throw new BadCredentialsException();
 
         _logger.Information("Creating access and refresh tokens...");
-        var accessToken = await tokenService.BuildAccessTokenAsync(user, input.Context);
-        var refreshToken = tokenService.BuildRefreshToken(user, input.Context);
+        var accessToken = await tokenService.BuildAccessTokenAsync(user, tenantID);
+        var refreshToken = tokenService.BuildRefreshToken(user, tenantID);
         var accessJwt = tokenService.Encode(accessToken);
         var refreshJwt = tokenService.Encode(refreshToken);
 
-        ctx?.Response.Headers.AddRefreshTokenCookie(refreshJwt, input.Context);
+        ctx?.Response.Headers.AddRefreshTokenCookie(refreshJwt, tenantID);
 
         _logger.Information("User logged in!");
         return new(accessJwt, accessToken.ValidTo);
