@@ -8,13 +8,15 @@ datasource db {
 }
 
 model Roles {
-  ID                                 String     @id(map: "PK_Roles")
-  Name                               String     @unique(map: "AK_Roles_Name")
-  DateCreated                        DateTime   @db.Timestamptz(6)
-  DateLastUpdated                    DateTime   @db.Timestamptz(6)
-  Accounts                           Accounts[]
-  Tenants_Tenants_AdminRoleIDToRoles Tenants[]  @relation("Tenants_AdminRoleIDToRoles")
-  Tenants_Tenants_UserRoleIDToRoles  Tenants[]  @relation("Tenants_UserRoleIDToRoles")
+  ID              String     @id(map: "PK_Roles")
+  Name            String     @unique(map: "AK_Roles_Name")
+  DateCreated     DateTime   @db.Timestamptz(6)
+  DateLastUpdated DateTime   @db.Timestamptz(6)
+  TenantID        String?
+  Accounts        Accounts[]
+  Tenants         Tenants?   @relation(fields: [TenantID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "FK_Roles_Tenants_TenantID")
+
+  @@index([TenantID], map: "IX_Roles_TenantID")
 }
 
 model Users {
@@ -37,19 +39,6 @@ model EFMigrationsHistory {
   @@map("__EFMigrationsHistory")
 }
 
-model Services {
-  ID              String   @id(map: "PK_Services")
-  Name            String   @unique(map: "AK_Services_Name")
-  TenantID        String
-  ApiKey          String
-  DateCreated     DateTime @db.Timestamptz(6)
-  DateLastUpdated DateTime @db.Timestamptz(6)
-  SecurityStamp   String
-  Tenants         Tenants  @relation(fields: [TenantID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Services_Tenants_TenantID")
-
-  @@index([TenantID], map: "IX_Services_TenantID")
-}
-
 model Accounts {
   ID              String   @id(map: "PK_Accounts")
   UserID          String
@@ -67,17 +56,11 @@ model Accounts {
 }
 
 model Tenants {
-  ID                               String     @id(map: "PK_Tenants")
-  Name                             String     @unique(map: "IX_Tenants_Name")
-  UserRoleID                       String
-  AdminRoleID                      String
-  DateCreated                      DateTime   @db.Timestamptz(6)
-  DateLastUpdated                  DateTime   @db.Timestamptz(6)
-  Accounts                         Accounts[]
-  Services                         Services[]
-  Roles_Tenants_AdminRoleIDToRoles Roles      @relation("Tenants_AdminRoleIDToRoles", fields: [AdminRoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tenants_Roles_AdminRoleID")
-  Roles_Tenants_UserRoleIDToRoles  Roles      @relation("Tenants_UserRoleIDToRoles", fields: [UserRoleID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tenants_Roles_UserRoleID")
-
-  @@index([AdminRoleID], map: "IX_Tenants_AdminRoleID")
-  @@index([UserRoleID], map: "IX_Tenants_UserRoleID")
+  ID              String     @id(map: "PK_Tenants")
+  Name            String     @unique(map: "IX_Tenants_Name")
+  ApiKey          String
+  DateCreated     DateTime   @db.Timestamptz(6)
+  DateLastUpdated DateTime   @db.Timestamptz(6)
+  Accounts        Accounts[]
+  Roles           Roles[]
 }

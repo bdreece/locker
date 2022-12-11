@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locker", "src\Locker.csproj", "{09D96AD7-9D2C-4B49-927C-7CC660496754}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locker.Testing", "test\Locker.Testing.csproj", "{942E18E9-E096-468A-9BF2-DC803F4584AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09D96AD7-9D2C-4B49-927C-7CC660496754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09D96AD7-9D2C-4B49-927C-7CC660496754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09D96AD7-9D2C-4B49-927C-7CC660496754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09D96AD7-9D2C-4B49-927C-7CC660496754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{942E18E9-E096-468A-9BF2-DC803F4584AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{942E18E9-E096-468A-9BF2-DC803F4584AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{942E18E9-E096-468A-9BF2-DC803F4584AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{942E18E9-E096-468A-9BF2-DC803F4584AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
