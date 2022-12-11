@@ -1,1 +1,13 @@
+global using System.Runtime.CompilerServices;
+global using System.Text.Json;
 global using Xunit;
+global using Microsoft.Extensions.DependencyInjection;
+global using Moq;
+global using Moq.EntityFrameworkCore;
+global using HotChocolate;
+global using HotChocolate.Execution;
+global using Locker.Models;
+global using Locker.Models.Entities;
+global using Locker.Resolvers;
+global using Locker.Services;
+global using Locker.Testing.Mocks;
