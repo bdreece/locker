@@ -17,25 +17,22 @@ public class UseTenantAuthenticationAttribute : ObjectFieldDescriptorAttribute
         IDescriptorContext _context,
         IObjectFieldDescriptor descriptor,
         MemberInfo _member
-    )
+    ) => descriptor.Use(next => async ctx =>
     {
-        descriptor.Use(next => async ctx =>
+        var dbContextFactory = ctx.Services.GetRequiredService<IDbContextFactory<DataContext>>();
+        var tenantID = ctx.GetGlobalValue<string>(TenantID);
+        var tenantKey = ctx.GetGlobalValue<string>(TenantKey);
+        var isRoot = ctx.GetGlobalValue<bool>(IsRoot);
+
+        if (!isRoot)
         {
-            var dbContextFactory = ctx.Services.GetRequiredService<IDbContextFactory<DataContext>>();
-            var tenantID = ctx.GetGlobalValue<string>(TenantID);
-            var tenantKey = ctx.GetGlobalValue<string>(TenantKey);
-            var isRoot = ctx.GetGlobalValue<bool>(IsRoot);
+            await using var db = await dbContextFactory.CreateDbContextAsync();
 
-            if (!isRoot)
-            {
-                await using var db = await dbContextFactory.CreateDbContextAsync();
+            var tenant = await db.Tenants.SingleOrDefaultAsync(t => t.ID == tenantID);
+            if (tenant is null || tenant.ApiKey != tenantKey)
+                throw new UnauthenticatedException();
+        }
 
-                var tenant = await db.Tenants.SingleOrDefaultAsync(t => t.ID == tenantID);
-                if (tenant is null || tenant.ApiKey != tenantKey)
-                    throw new UnauthenticatedException();
-            }
-
-            await next(ctx);
-        });
-    }
+        await next(ctx);
+    });
 }
