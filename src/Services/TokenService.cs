@@ -29,14 +29,15 @@ public class TokenService : ITokenService
 
     public ValueTask DisposeAsync() => _db.DisposeAsync();
 
-    public async Task<SecurityToken> BuildAccessTokenAsync(User principal, string tenant, TimeSpan? validFor = default)
+    public async Task<SecurityToken> BuildAccessTokenAsync(User principal, string tenantID, TimeSpan? validFor = default)
     {
-        var claims = await GetUserClaimsAsync(principal, tenant);
-        return BuildToken(principal, tenant, claims, validFor ?? TimeSpan.FromHours(2));
+        var roles = await GetUserRolesAsync(principal, tenantID);
+        var claims = GetUserClaims(principal, tenantID, roles);
+        return BuildToken(principal, tenantID, claims, validFor ?? TimeSpan.FromHours(2));
     }
 
-    public SecurityToken BuildRefreshToken(User principal, string tenant) =>
-        BuildToken(principal, tenant, Enumerable.Empty<Claim>(), TimeSpan.FromDays(365));
+    public SecurityToken BuildRefreshToken(User principal, string tenantID) =>
+        BuildToken(principal, tenantID, GetUserClaims(principal, tenantID, Enumerable.Empty<string>()), TimeSpan.FromDays(365));
 
     public string Encode(SecurityToken token) =>
         _tokenHandler.WriteToken(token);
@@ -45,6 +46,7 @@ public class TokenService : ITokenService
     {
         var principal = _tokenHandler.ValidateToken(token, new()
         {
+            ValidateAudience = false,
             ValidateIssuer = true,
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
@@ -68,9 +70,8 @@ public class TokenService : ITokenService
         return _tokenHandler.CreateToken(tokenDescriptor);
     }
 
-    private async Task<IEnumerable<Claim>> GetUserClaimsAsync(User user, string tenantID)
-    {
-        var roles = await _db.Accounts
+    private async Task<IEnumerable<string>> GetUserRolesAsync(User user, string tenantID) =>
+        await _db.Accounts
             .Include(acct => acct.Role)
             .Include(acct => acct.Tenant)
             .Where(acct => acct.UserID == user.ID)
@@ -78,7 +79,8 @@ public class TokenService : ITokenService
             .Select(acct => acct.Role!.Name)
             .ToArrayAsync();
 
-        return roles
+    private IEnumerable<Claim> GetUserClaims(User user, string tenantID, IEnumerable<string> roles) =>
+        roles
             .Select(role => new Claim(ClaimTypes.Role, role))
             .Concat(new Claim[]
             {
@@ -89,5 +91,5 @@ public class TokenService : ITokenService
                 new(ClaimTypes.MobilePhone, user.Phone ?? string.Empty),
                 new(ClaimTypes.GroupSid, tenantID)
             });
-    }
+
 }

@@ -6,8 +6,8 @@ namespace Locker.Services;
 
 public interface ITokenService : IAsyncDisposable
 {
-    Task<SecurityToken> BuildAccessTokenAsync(User principal, string context, TimeSpan? validFor = default);
-    SecurityToken BuildRefreshToken(User principal, string context);
+    Task<SecurityToken> BuildAccessTokenAsync(User principal, string tenantID, TimeSpan? validFor = default);
+    SecurityToken BuildRefreshToken(User principal, string tenantID);
 
     string Encode(SecurityToken token);
     (ClaimsPrincipal principal, SecurityToken token) Decode(string token);
