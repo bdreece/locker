@@ -2,10 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 WORKDIR /usr/share/locker/
 
-COPY ./Locker.csproj .
+COPY ./src/Locker.csproj .
 RUN dotnet restore
 
-COPY ./* ./
+COPY ./src/* ./
 RUN dotnet publish -c Release --no-restore
 
 # Run stage
