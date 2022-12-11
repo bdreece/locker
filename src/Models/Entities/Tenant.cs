@@ -8,7 +8,7 @@ using Locker.Services;
 namespace Locker.Models.Entities;
 
 [Index(nameof(Name), IsUnique = true)]
-public class Tenant : EntityBase
+public sealed class Tenant : EntityBase
 {
     [Required]
     public string Name { get; set; } = string.Empty;
