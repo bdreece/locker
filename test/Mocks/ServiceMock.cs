@@ -26,10 +26,21 @@ public static class ServiceMock
     static ServiceMock()
     {
         Services = new ServiceCollection()
-            .AddGraphQLServer()
-            .AddQueryType<Query>()
-            .Services
+            .AddHttpContextAccessor()
             .AddSingleton<DataContext>(DataContextMock.DataContext)
+            .AddGraphQLServer()
+            .RegisterDbContext<DataContext>()
+            .AddHttpRequestInterceptor<HttpRequestInterceptor>()
+            .AddGlobalObjectIdentification()
+            .AddAuthorization()
+            .AddProjections()
+            .AddFiltering()
+            .AddSorting()
+            .AddQueryType<Query>()
+            .AddMutationType<Mutation>()
+            .AddMutationConventions(applyToAllMutations: true)
+            .AddQueryFieldToMutationPayloads()
+            .Services
             .AddSingleton(
                 sp => new RequestExecutorProxy(
                     sp.GetRequiredService<IRequestExecutorResolver>(),

@@ -17,58 +17,88 @@
  */
 namespace Locker.Testing.Resolvers;
 
-// public class AccountResolverTest
-// {
-//     private readonly DataContextMock _mock = new();
-//     private readonly Query query = new();
-// 
-//     private const string accountFragment = @"
-//         fragment account on Account {
-//             id
-//             dateCreated
-//             dateLastUpdated
-//             roleID
-//             role
-//             userID
-//             user
-//             tenantID
-//             tenant
-//         }
-//     ";
-// 
-//     [Fact]
-//     public async Task GetAccountsTest()
-//     {
-//         var expected = _mock.Accounts.ToString();
-//         var got = await ServiceMock.ExecuteRequestAsync(b =>
-//             b.SetQuery(@$"
-//                 {accountFragment}
-//                 query {{
-//                     accounts {{
-//                         ...account
-//                     }}
-//                 }}
-//             "));
-// 
-//         Assert.Equal(expected, got);
-//     }
-// 
-//     [Fact]
-//     public void GetFirstAccountTest()
-//     {
-//         var expected = _mock.Accounts.First();
-//         var got = query.GetFirstAccount(_mock.DataContext).FirstOrDefault();
-// 
-//         Assert.Equal(expected, got);
-//     }
-// 
-//     [Fact]
-//     public void GetUniqueAccountTest()
-//     {
-//         var expected = _mock.Accounts.First();
-//         var got = query.GetUniqueAccount(_mock.DataContext)
-//             .SingleOrDefault(a => a.ID == expected.ID);
-// 
-//         Assert.Equal(expected, got);
-//     }
-// }
+public class AccountResolverTest
+{
+    private readonly DataContextMock _mock = new();
+    private readonly Query query = new();
+
+    private const string ACCOUNT = @"
+    fragment account on Account {
+        id
+        dateCreated
+        dateLastUpdated
+        roleID
+        userID
+        tenantID
+    }
+    ";
+
+    private record AccountsResult(AccountConnection? Data, dynamic Errors);
+    private record AccountConnection(IEnumerable<Account> Nodes);
+    private record AccountResult(Account? Data);
+
+    [Fact]
+    public async Task GetAccountsTest()
+    {
+        var query = @$"
+        {ACCOUNT}
+        {{
+            accounts {{
+                nodes {{
+                    ...account
+                }}
+            }}
+        }}
+        ";
+
+        // Console.WriteLine(query);
+
+        var expected = _mock.Accounts;
+        var gotJson = await ServiceMock.ExecuteRequestAsync(b => b.SetQuery(query));
+        var got = JsonSerializer.Deserialize<AccountsResult>(gotJson);
+
+        Assert.Equal(expected, got?.Data?.Nodes ?? Enumerable.Empty<Account>());
+    }
+
+    [Fact]
+    public async void GetFirstAccountTest()
+    {
+        var query = @$"
+        {ACCOUNT}
+        {{
+            firstAccount {{
+                ...account
+            }}
+        }}
+        ";
+
+        // Console.WriteLine(query);
+
+        var expected = _mock.Accounts.First();
+        var gotJson = await ServiceMock.ExecuteRequestAsync(b => b.SetQuery(query));
+        var got = JsonSerializer.Deserialize<AccountResult>(gotJson);
+
+        Assert.Equal(expected, got?.Data);
+    }
+
+    [Fact]
+    public async void GetUniqueAccountTest()
+    {
+        var expected = _mock.Accounts.First();
+        var query = @$"
+            {ACCOUNT}
+            {{
+                uniqueAccount(where: {{ id: {{ eq: ""{expected.ID}"" }} }}) {{
+                    ...account
+                }}
+            }}
+            ";
+
+        // Console.WriteLine(query);
+
+        var gotJson = await ServiceMock.ExecuteRequestAsync(b => b.SetQuery(query));
+        var got = JsonSerializer.Deserialize<AccountResult>(gotJson);
+
+        Assert.Equal(expected, got?.Data);
+    }
+}
