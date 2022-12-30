@@ -24,7 +24,6 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
-using Locker.Models;
 using Locker.Models.Entities;
 
 namespace Locker.Services;
