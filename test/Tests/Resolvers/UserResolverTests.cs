@@ -157,7 +157,7 @@ public sealed class UserResolverTests : ResolverFixture
         var tenant = await DataContext.Tenants.FirstOrDefaultAsync();
         Assume.That(tenant, Is.Not.Null);
 
-        var idString = IdSerializer!.Serialize(Schema.DefaultName, nameof(Role), id);
+        var idString = IdSerializer!.Serialize(Schema.DefaultName, nameof(User), id);
         var request = new QueryRequestBuilder()
             .SetQuery(query)
             .SetServices(scope.ServiceProvider)
@@ -201,7 +201,7 @@ public sealed class UserResolverTests : ResolverFixture
         var tenant = await DataContext.Tenants.FirstOrDefaultAsync();
         Assume.That(tenant, Is.Not.Null);
 
-        var idString = IdSerializer!.Serialize(Schema.DefaultName, nameof(Role), id);
+        var idString = IdSerializer!.Serialize(Schema.DefaultName, nameof(User), id);
         var request = new QueryRequestBuilder()
             .SetQuery(query)
             .SetServices(scope.ServiceProvider)
