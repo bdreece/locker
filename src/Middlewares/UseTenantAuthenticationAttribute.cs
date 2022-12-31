@@ -48,6 +48,8 @@ public class UseTenantAuthenticationAttribute : ObjectFieldDescriptorAttribute
             var tenant = await db.Tenants.SingleOrDefaultAsync(t => t.ID == tenantID);
             if (tenant is null || tenant.ApiKey != tenantKey)
                 throw new UnauthenticatedException();
+
+            ctx.SetGlobalValue<bool>(TenantAuthState, true);
         }
 
         await next(ctx);
