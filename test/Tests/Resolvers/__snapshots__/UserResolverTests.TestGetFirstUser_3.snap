@@ -1,0 +1,17 @@
+﻿{
+  "Label": null,
+  "Path": null,
+  "Data": {
+    "firstUser": {
+      "id": "VXNlcgpkMw==",
+      "firstName": "FirstName3",
+      "lastName": "FirstName3",
+      "email": "Email3",
+      "phone": "Phone3"
+    }
+  },
+  "Errors": null,
+  "Extensions": null,
+  "ContextData": null,
+  "HasNext": null
+}
