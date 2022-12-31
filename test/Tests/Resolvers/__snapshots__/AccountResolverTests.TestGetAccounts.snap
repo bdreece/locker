@@ -1,0 +1,32 @@
+﻿{
+  "Label": null,
+  "Path": null,
+  "Data": {
+    "accounts": {
+      "nodes": [
+        {
+          "id": "QWNjb3VudApkMQ==",
+          "userID": "VXNlcgpkMg==",
+          "roleID": "Um9sZQpkMw==",
+          "tenantID": "VGVuYW50CmQ0"
+        },
+        {
+          "id": "QWNjb3VudApkMg==",
+          "userID": "VXNlcgpkMw==",
+          "roleID": "Um9sZQpkNA==",
+          "tenantID": "VGVuYW50CmQ1"
+        },
+        {
+          "id": "QWNjb3VudApkMw==",
+          "userID": "VXNlcgpkNA==",
+          "roleID": "Um9sZQpkNQ==",
+          "tenantID": "VGVuYW50CmQ2"
+        }
+      ]
+    }
+  },
+  "Errors": null,
+  "Extensions": null,
+  "ContextData": null,
+  "HasNext": null
+}

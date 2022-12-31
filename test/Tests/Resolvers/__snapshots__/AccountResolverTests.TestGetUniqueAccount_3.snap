@@ -1,0 +1,16 @@
+﻿{
+  "Label": null,
+  "Path": null,
+  "Data": {
+    "uniqueAccount": {
+      "id": "QWNjb3VudApkMw==",
+      "userID": "VXNlcgpkNA==",
+      "roleID": "Um9sZQpkNQ==",
+      "tenantID": "VGVuYW50CmQ2"
+    }
+  },
+  "Errors": null,
+  "Extensions": null,
+  "ContextData": null,
+  "HasNext": null
+}

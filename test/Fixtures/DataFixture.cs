@@ -24,8 +24,14 @@ public abstract class DataFixture : FixtureBase
     protected DataContext DataContext => DataContextMock.Object;
     protected IDbContextFactory<DataContext> DbContextFactory => DbContextFactoryMock.Object;
 
+    protected DataFixture() : base() { }
+
     protected virtual void InitServices()
     {
-        DbContextFactoryMock.Setup(f => f.CreateDbContext()).Returns(DataContext);
+        DbContextFactoryMock.Setup(f => f.CreateDbContext())
+            .Returns(DataContext);
+
+        DbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(DataContext));
     }
 }

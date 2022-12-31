@@ -20,17 +20,21 @@ namespace Locker.Tests;
 public abstract class ResolverFixture : DataFixture
 {
     protected IServiceProvider? ServiceProvider { get; private set; }
+    protected IIdSerializer? IdSerializer { get; private set; }
     protected RequestExecutorProxy? Executor { get; private set; }
+
+    protected ResolverFixture() : base() { }
 
     protected override void InitServices()
     {
         base.InitServices();
         ServiceProvider = new ServiceCollection()
-            .AddScoped(_ => DataContext)
+            .AddScoped(_ => DbContextFactory)
             .AddGraphQL()
+            .AddGlobalObjectIdentification()
             .AddMutationConventions(applyToAllMutations: true)
             .AddQueryFieldToMutationPayloads()
-            .RegisterDbContext<DataContext>()
+            .RegisterDbContext<DataContext>(DbContextKind.Pooled)
             .AddProjections()
             .AddFiltering()
             .AddSorting()
@@ -44,5 +48,6 @@ public abstract class ResolverFixture : DataFixture
             .BuildServiceProvider();
 
         Executor = ServiceProvider.GetRequiredService<RequestExecutorProxy>();
+        IdSerializer = ServiceProvider.GetRequiredService<IIdSerializer>();
     }
 }
