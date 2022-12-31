@@ -1,0 +1,29 @@
+﻿{
+  "Label": null,
+  "Path": null,
+  "Data": {
+    "roles": {
+      "nodes": [
+        {
+          "id": "Um9sZQpkMQ==",
+          "name": "Name1",
+          "tenantID": "VGVuYW50CmQz"
+        },
+        {
+          "id": "Um9sZQpkMg==",
+          "name": "Name2",
+          "tenantID": "VGVuYW50CmQ0"
+        },
+        {
+          "id": "Um9sZQpkMw==",
+          "name": "Name3",
+          "tenantID": "VGVuYW50CmQ1"
+        }
+      ]
+    }
+  },
+  "Errors": null,
+  "Extensions": null,
+  "ContextData": null,
+  "HasNext": null
+}
