@@ -1,0 +1,5 @@
+[ReportGenerator]
+    reports = .results/**/coverage.cobertura.xml
+    targetdir = .coverage
+    reporttypes = Html_Light
+    sourcedir = ../src

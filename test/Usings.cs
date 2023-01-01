@@ -34,3 +34,4 @@ global using Locker.Models.Entities;
 global using Locker.Models.Inputs;
 global using Locker.Services;
 global using Locker.Resolvers;
+global using static Locker.Models.WellKnownGlobalStateKeys;

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+    <!-- configuration elements -->
+    <RunConfiguration>
+        <ResultsDirectory>.results</ResultsDirectory>
+    </RunConfiguration>
+
+    <DataCollectionRunSettings>
+        <DataCollectors>
+
+            <!-- data collectors -->
+            <DataCollector friendlyName="XPlat Code Coverage">
+                <Configuration>
+                    <Format>cobertura</Format>
+                    <SingleHit>false</SingleHit>
+                    <UseSourceLink>true</UseSourceLink>
+                    <IncludeTestAssembly>true</IncludeTestAssembly>
+                    <SkipAutoProps>true</SkipAutoProps>
+                    <DeterministicReport>false</DeterministicReport>
+                    <ExcludeAssembliesWithoutSources>MissingAll,MissingAny,None</ExcludeAssembliesWithoutSources>
+                </Configuration>
+            </DataCollector>
+
+        </DataCollectors>
+    </DataCollectionRunSettings>
+
+    <LoggerRunSettings>
+        <Loggers>
+
+            <!-- loggers -->
+            <Logger friendlyName="console" enabled="True">
+                <Configuration>
+                    <Verbosity>quiet</Verbosity>
+                </Configuration>
+            </Logger>
+
+            <Logger friendlyName="html" enabled="True">
+                <Configuration>
+                    <LogFileName>index.html</LogFileName>
+                </Configuration>
+            </Logger>
+
+            <Logger friendlyName="trx" enabled="True">
+                <Configuration>
+                    <LogFileName>log.trx</LogFileName>
+                </Configuration>
+            </Logger>
+        
+        </Loggers>
+    </LoggerRunSettings>
+
+</RunSettings>

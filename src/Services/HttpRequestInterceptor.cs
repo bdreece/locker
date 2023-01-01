@@ -17,8 +17,9 @@
  */
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
-using Microsoft.EntityFrameworkCore;
-using Locker.Models;
+
+using static Locker.Models.WellKnownGlobalStateKeys;
+using static Locker.Models.WellKnownRoles;
 
 namespace Locker.Services;
 
@@ -40,6 +41,7 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
             .SingleOrDefault(h => h.Key == TENANT_ID_HEADER)
             .Value
             .SingleOrDefault();
+
         var tenantKey = context.Request.Headers
             .SingleOrDefault(h => h.Key == TENANT_KEY_HEADER)
             .Value
@@ -49,8 +51,8 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
 
         requestBuilder.SetProperties(new()
         {
-            { TENANT_ID, tenantID },
-            { TENANT_KEY, tenantKey },
+            { TenantID, tenantID },
+            { TenantKey, tenantKey },
             { accessLevel, true }
         });
 

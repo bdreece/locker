@@ -3,3 +3,5 @@ obj/
 logs/
 .vscode/
 appsettings.*.json
+.results/
+.coverage/
