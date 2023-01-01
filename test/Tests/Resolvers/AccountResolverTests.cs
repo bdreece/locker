@@ -53,19 +53,19 @@ public sealed class AccountResolverTests : ResolverFixture
     {
         var (ids, userIds, roleIds, tenantIds) = Cases.Aggregate(
             new AccountData(),
-            (ids, i) =>
+            (data, i) =>
                 new(
-                    ids.Ids.Append(i.ToString()),
-                    ids.UserIds.Append((i + 1).ToString()),
-                    ids.RoleIds.Append((i + 2).ToString()),
-                    ids.TenantIds.Append((i + 3).ToString())
+                    data.Ids.Append(i.ToString()),
+                    data.UserIds.Append((i + 1).ToString()),
+                    data.RoleIds.Append((i + 2).ToString()),
+                    data.TenantIds.Append((i + 3).ToString())
                 ),
-            (ids) =>
+            data =>
                 (
-                    ids.Ids.ToStack(),
-                    ids.UserIds.ToStack(),
-                    ids.RoleIds.ToStack(),
-                    ids.TenantIds.ToStack()
+                    data.Ids.ToStack(),
+                    data.UserIds.ToStack(),
+                    data.RoleIds.ToStack(),
+                    data.TenantIds.ToStack()
                 )
             );
 

@@ -50,17 +50,17 @@ public sealed class RoleResolverTests : ResolverFixture
     {
         var (ids, names, tenantIds) = Cases.Aggregate(
             new RoleData(),
-            (ids, i) =>
+            (data, i) =>
                 new(
-                    ids.Ids.Append(i.ToString()),
-                    ids.Names.Append($"Name{i}"),
-                    ids.TenantIds.Append((i + 2).ToString())
+                    data.Ids.Append(i.ToString()),
+                    data.Names.Append($"Name{i}"),
+                    data.TenantIds.Append((i + 2).ToString())
                 ),
-            (ids) =>
+            data =>
                 (
-                    ids.Ids.ToStack(),
-                    ids.Names.ToStack(),
-                    ids.TenantIds.ToStack()
+                    data.Ids.ToStack(),
+                    data.Names.ToStack(),
+                    data.TenantIds.ToStack()
                 )
             );
 

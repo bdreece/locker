@@ -64,7 +64,7 @@ public sealed class UserResolverTests : ResolverFixture
                     data.Emails.Append($"Email{i}"),
                     data.Phones.Append($"Phone{i}")
                 ),
-            (data) =>
+            data =>
                 (
                     data.Ids.ToStack(),
                     data.FirstNames.ToStack(),
